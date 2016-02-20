@@ -1,0 +1,131 @@
+/**
+ * sums all cells in array
+ * @param array[target array of ints]
+ * @param from[first cell to count]
+ * @param to[last cell to count]
+ */
+int array_summFromTo(int array[],int from, int to)
+{   
+    int i = 0;
+    int summ = 0;
+    
+    for(i = from; i < to; i = i + 1)
+    {
+        summ = summ + array[i];
+    }  
+	return summ;
+} 
+
+/**
+ * sums 
+ * @param array[target array of ints]
+ */
+int array_summAll(int array[])
+{   
+    int i = 0;
+    int arrMaxIdx = _array_size(array) - 1;
+    int summ = 0;
+    
+    for(i = 0; i <= arrMaxIdx; i = i + 1)
+    {
+        summ = summ + array[i];
+    }
+    
+    return summ;
+} 
+
+/**
+ * fills array with zeros. Used to initialize array with random size
+ * @param array [target array of ints]
+ */
+void array_fillWithZeros(int array[])
+{    
+    int i = 0;
+    int arrMaxIdx = _array_size(array) - 1;
+    
+    for(i = 0; i <= arrMaxIdx; i = i + 1)
+    {
+        array[i] = 0;
+    }
+}
+
+/**
+ * Return 1 if all values in array is strictly descending from first to last
+ * @param  array [description]
+ * @return       [description]
+ */
+int array_isDescending(int array[])
+{    
+    int i = 0;
+    int comparisonChain = 0;
+    int arrMaxIdx = _array_size(array) - 1;
+    
+    for(i = 0; i < arrMaxIdx; i = i + 1)
+      {
+        if( array[i] > array[i + 1] )
+          {
+            comparisonChain = comparisonChain + 1;
+        }
+    }
+    
+    if( comparisonChain == arrMaxIdx ) 
+      return 1;
+    else
+      return 0;
+}
+
+/**
+ * will put value at first array cell( 0 )
+ * and move all other cells down
+ * previous data in last cell will be lost
+ * @param array [description]
+ * @param value [description]
+ */
+void array_pop(int array[], int value)
+{    
+    int arrMaxIdx = _array_size(array) - 1;
+    int i = 0;
+    
+    for(i = arrMaxIdx; i >= 1; i = i - 1)
+      {
+        array[i] = array[i-1];
+    }
+    array[0] = value;
+}
+
+/**
+ * Print all values from array on LCD separated by spaces
+ * Not terminating screen buffer by \n as we probably need to print values inside some labels
+ * @param array [description]
+ */
+void array_print(int array[])
+{    
+    int arrSize = _array_size(array);
+    int i = 0;
+    
+    for(i = 0; i < arrSize; i = i + 1)
+    {
+        printf("%d ", array[i]);
+    }
+}
+
+/**
+ * Calculate average value between /from/ and /to/ cells
+ * @param array [target array of ints]
+ * @param from [first cell to add]
+ * @param to [last cell to add]
+ */
+//TODO: make this functions to float
+int array_averageFromTo(int arr[], int from, int to)
+{
+    return( array_summFromTo(arr,from,to) / (to - from) );
+}
+
+/**
+ * Calculate average value of all array cells
+ * @param array [target array of ints]
+ */
+int array_averageAll(int arr[])
+{    
+    return( array_summAll(arr) / (_array_size(arr) ) );
+}

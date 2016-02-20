@@ -1,0 +1,93 @@
+#include array.ic
+#define SERVO_MAX_VALUE 3900
+#define SERVO_MIN_VALUE 1100
+#define SERVO_OUT servo0//which output is used by servo
+#define STEPS 18//how many steps between MIN and MAX value servo should do
+#define FRONT_SENSOR_INPUT 4
+
+int servoValues[STEPS];//array used to store servo step values
+int rngs[STEPS];//array used to store ranges of sensor
+
+int rev = 0;//spin servo in reverse direction
+int servoValue = 0;
+
+int border_left = STEPS / 3 - 1;//any servo value means servo in virtual "left" sector
+int border_middle = STEPS / 3 * 2 - 1;//and so on
+int border_right = STEPS - 1;
+
+int left=0;//average values for left,
+int right=0;//right
+int middle=0;//and middle sector
+
+int trig=35;//'too close to obstacle' trigger
+
+void fillArrayWithServoValues(int arr[])//initialize array function
+{
+    int i = 0;
+    
+    for( i = 0; i <= STEPS - 1; i = i + 1 )
+      {
+        arr[i] = SERVO_MIN_VALUE + (SERVO_MAX_VALUE - SERVO_MIN_VALUE / STEPS) * (i + 1);
+    }
+}
+
+void makeServoStep(int i)
+{
+        if( i <= STEPS - 1 & !rev ) { i++; }
+        if( i == STEPS - 1 & !rev ) { rev = 1; }
+        if( i >= 0 & rev ) { i--; }
+        if( i == 0 & rev ) { rev = 0; }
+        
+        SERVO_OUT = servoValues[servoValue];
+}
+
+void main()
+{
+    init_expbd_servos(1);
+    SERVO_OUT = (SERVO_MAX_VALUE + SERVO_MIN_VALUE) / 2;//put servo in middle position
+    
+    fillArrayWithServoValues(servoValues);
+    
+    printf("Press start     button to begin\n");
+    
+    start_press();//wait for start button
+    
+    while(1)
+      {
+        printf("i:%d,L:%d,M:%d,R:%d\n",i,left,middle,right);//print debug info
+        
+        makeServoStep(servoValue);
+        
+        rngs[servoValue] = analog(FRONT_SENSOR_INPUT);//read sensor
+        
+        if( servoValue == border_left   & !rev ) { left   = array_averageFromTo(rngs, 0, border_left); }
+        if( servoValue == border_middle & !rev ) { middle = array_averageFromTo(rngs, border_left   + 1, border_middle); }
+        if( servoValue == border_right  & !rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); }
+        
+        if( servoValue == 0 & rev )                { left   = array_averageFromTo(rngs, 0, border_left); }
+        if( servoValue == border_left + 1 & rev )  { middle = array_averageFromTo(rngs, border_left   + 1, border_middle); }
+        if( servoValue == border_middle +1 & rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); }
+        
+        motor(0,100 - ( 11/10 *( 3 / 2 * right + middle * 9/10) ) );//fractions used to avoid float casting because float nubers does not natively
+        motor(1,100 - ( 11/10 *( 3 / 2 * left  + middle * 9/10) ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
+        
+        if ( middle > trig )
+          {
+            if( right > left )
+              {
+                motor(1,80);
+                motor(0,-70);
+            }
+            else
+              {
+                motor(1,-70);
+                motor(0,80);
+            }
+            sleep(.005);
+        }
+        
+        sleep(.01);
+        
+    }
+}
+
