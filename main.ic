@@ -4,6 +4,8 @@
 #define SERVO_OUT servo0//which output is used by servo
 #define STEPS 18//how many steps between MIN and MAX value servo should do
 #define FRONT_SENSOR_INPUT 4
+#define LEFT_SENSOR_INPUT 3
+#define RIGHT_SENSOR_INPUT 2
 
 int servoValues[STEPS];//array used to store servo step values
 int rngs[STEPS];//array used to store ranges of sensor
@@ -52,6 +54,33 @@ void calculateAverages()
         if( servoValue == border_middle +1 & rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); }
 }
 
+int rightSensor()
+{
+	return analog(RIGHT_SENSOR_INPUT);
+}
+
+int leftSensor()
+{
+	return analog(LEFT_SENSOR_INPUT);
+}
+
+void wallAvoidance()
+{
+	if ( middle > trig )
+	{
+		if( right > left )
+		{
+			motor(1,80);
+			motor(0,-70);
+		}
+		else
+		{
+			motor(1,-70);
+			motor(0,80);
+		}
+	}
+}
+
 void main()
 {
     init_expbd_servos(1);
@@ -73,25 +102,10 @@ void main()
         
         calculateAverages();
         
-        motor(0,100 - ( 11/10 *( 3 / 2 * right + middle * 9/10) ) );//fractions used to avoid float casting because float nubers does not natively
-        motor(1,100 - ( 11/10 *( 3 / 2 * left  + middle * 9/10) ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
-        
-        if ( middle > trig )
-          {
-            if( right > left )
-              {
-                motor(1,80);
-                motor(0,-70);
-            }
-            else
-              {
-                motor(1,-70);
-                motor(0,80);
-            }
-            sleep(.005);
-        }
-        
-        sleep(.01);
+        motor(0,100 - ( 11/10 * ( 3 / 2 * right + middle * 9/10) ) );//fractions used to avoid float casting because float nubers does not natively
+        motor(1,100 - ( 11/10 * ( 3 / 2 * left  + middle * 9/10) ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
+		
+		wallAvoidance();
         
     }
 }
