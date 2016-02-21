@@ -66,6 +66,9 @@ int leftSensor()
 
 void wallAvoidance()
 {
+	motor(0,100 - ( 11/10 * ( 3 / 2 * right + middle * 9/10) ) );//fractions used to avoid float casting because float nubers does not natively
+    motor(1,100 - ( 11/10 * ( 3 / 2 * left  + middle * 9/10) ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
+		
 	if ( middle > trig )
 	{
 		if( right > left )
@@ -101,9 +104,6 @@ void main()
         rngs[servoValue] = analog(FRONT_SENSOR_INPUT);//read sensor
         
         calculateAverages();
-        
-        motor(0,100 - ( 11/10 * ( 3 / 2 * right + middle * 9/10) ) );//fractions used to avoid float casting because float nubers does not natively
-        motor(1,100 - ( 11/10 * ( 3 / 2 * left  + middle * 9/10) ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
 		
 		wallAvoidance();
         
