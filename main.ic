@@ -2,7 +2,7 @@
 #define SERVO_MAX_VALUE 3900
 #define SERVO_MIN_VALUE 1100
 #define SERVO_OUT servo0//which output is used by servo
-#define STEPS 27//how many steps between MIN and MAX value servo should do
+#define STEPS 21//how many steps between MIN and MAX value servo should do
 #define FRONT_SENSOR_INPUT 4
 #define LEFT_SENSOR_INPUT 3
 #define RIGHT_SENSOR_INPUT 2
@@ -24,7 +24,7 @@ int middle=0;//and middle sector
 int wallLeft = 0;
 int wallRight = 0;
 
-int trig=35;//'too close to obstacle' trigger
+int trig = 5;//'too close to obstacle' trigger
 
 void fillArrayWithServoValues(int arr[])//initialize array function
 { 
@@ -56,39 +56,47 @@ void calculateAverages()
     if( servoValue == border_middle +1 & rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); }
 }
 
-void correctCourse()
+void fixCourse()
 {
     int leftDist = analog(LEFT_SENSOR_INPUT);
     int rightDist = analog(RIGHT_SENSOR_INPUT);
     
-    if(leftDist > 40 && left != 255)
-      {
-        if( left > leftDist )
-          {
-            wallRight = 13 * ( left - leftDist );
+    if( leftDist )
+    {
+        if( leftDist > left / 10 )
+        {
+            wallLeft = leftDist - left;
+            wallRight = 0;
         }
         else
-          {
-            wallRight = 1;
-            wallLeft = 13 * ( leftDist - left);
-          }
-    } else if (rightDist > 40 && right != 225) {
-        if( right > leftDist )
-          {
-            wallLeft = 13 * ( right - rightDist );
+        {
+            wallLeft = 0;
+            wallRight = left - leftDist;
+        }
+    }
+    else if ( rightDist )
+    {
+        if( rightDist > right / 10 )
+        {
+            wallRight = rightDist - right;
+            wallLeft = 0;
         }
         else
-          {
-            wallLeft = 1;
-            wallRight = 13 * ( rightDist - right);
-          }
+        {
+            wallRight = 0;
+            wallLeft = rightDist - right;
+        }
+    }
+    else
+    {
+        wallLeft = wallRight = 0;
     }
 }
 
 void wallAvoidance() {
     
-    motor(0, 100 - (wallRight * 11/10 * ( 3 / 2 * right + middle * 9/10) ) );//fractions used to avoid float casting because float nubers does not natively
-    motor(1, 100 - (wallLeft * 11/10 * ( 3 / 2 * left  + middle * 9/10) ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
+    motor(0, 100 - ( 7/4 * right + middle * 1/2 + 1/2 * wallLeft ) );//fractions used to avoid float casting because float nubers does not natively
+    motor(1, 100 - ( 7/4 * left  + middle * 1/2 + 1/2 * wallRight ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
     
     if ( middle > trig )
       {
@@ -118,14 +126,14 @@ void main()
     
     while(1)
       {
-        //printf("i:%d,L:%d,M:%d,R:%d\n",servoValue,left,middle,right);//print debug info
-        printf("%d     %d\n",servoValues[servoValue], servoValue);
+        printf("i:%d,L:%d,M:%d,R:%d\n",servoValue,left,middle,right);//print debug info
+        //printf("%d     %d\n",servoValues[servoValue], servoValue);
         makeServoStep();
         
         rngs[servoValue] = analog(FRONT_SENSOR_INPUT);//read sensor
         
+        fixCourse();
         calculateAverages();
-        correctCourse();
         wallAvoidance();
         
     }
