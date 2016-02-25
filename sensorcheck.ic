@@ -3,28 +3,28 @@ int input = 2;//input to test
 void main()
 {
     while(1)
-    {
+      {
         input = knob()/30;
         printf("Turn KNOB to    select input!\n");
-
+        
         while(input == knob()/30 ) {}//do nothing
-
+        
         do
-        {
+          {
             if( input != (int)( 2. + 29. / 255. * (float)knob() ) )//29 total available inputs, starting from 2 ending 31
-            {//draw nothing if knob wasn't touched
+              {//draw nothing if knob wasn't touched
                 input = (int) ( 2. + 29. / 255. * (float)knob() );
                 printf( "START->CONTINUE Input #%d\n", input );
             }
         }
         while(!start_button());
-
+        
         while(!stop_button())
-        {
-            printf( "HOLD STOP-RETURNIN:%d,VAL:%d\n", input, analog(input) );
+          {
+            printf( "STOP -> RETURN  IN:%d,VAL:%d\n", input, analog(input) );
             msleep(75L);
         }
     }
 }
-            
-            
+
+

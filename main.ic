@@ -2,7 +2,7 @@
 #define SERVO_MAX_VALUE 3900
 #define SERVO_MIN_VALUE 1100
 #define SERVO_OUT servo0//which output is used by servo
-#define STEPS 21//how many steps between MIN and MAX value servo should do
+#define STEPS 27//how many steps between MIN and MAX value servo should do
 #define FRONT_SENSOR_INPUT 4
 #define LEFT_SENSOR_INPUT 3
 #define RIGHT_SENSOR_INPUT 2
@@ -24,7 +24,7 @@ int middle=0;//and middle sector
 int wallLeft = 0;
 int wallRight = 0;
 
-int trig = 60;//'too close to obstacle' trigger
+int trig = 50;//'too close to obstacle' trigger
 
 void fillArrayWithServoValues(int arr[])//initialize array function
 { 
@@ -33,6 +33,11 @@ void fillArrayWithServoValues(int arr[])//initialize array function
       {
         arr[i] = SERVO_MIN_VALUE + ( (SERVO_MAX_VALUE - SERVO_MIN_VALUE) / STEPS) * i;
     }
+}
+
+void printDebug()
+{
+    printf("i:%d,L:%d,M:%d,R:%d\n",servoValue,left,middle,right);
 }
 
 void makeServoStep()
@@ -47,13 +52,13 @@ void makeServoStep()
 
 void calculateAverages()
 {
-    if( servoValue == border_left   & !rev ) { left   = array_averageFromTo(rngs, 0, border_left); }
-    if( servoValue == border_middle & !rev ) { middle = array_averageFromTo(rngs, border_left   + 1, border_middle); }
-    if( servoValue == border_right  & !rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); }
+    if( servoValue == border_left   & !rev ) { left   = array_averageFromTo(rngs, 0, border_left); printDebug();}
+    if( servoValue == border_middle & !rev ) { middle = array_averageFromTo(rngs, border_left   + 1, border_middle); printDebug();}
+    if( servoValue == border_right  & !rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); printDebug();}
     
-    if( servoValue == 0 & rev )                { left   = array_averageFromTo(rngs, 0, border_left); }
-    if( servoValue == border_left + 1 & rev )  { middle = array_averageFromTo(rngs, border_left   + 1, border_middle); }
-    if( servoValue == border_middle +1 & rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); }
+    if( servoValue == 0 & rev )                { left   = array_averageFromTo(rngs, 0, border_left); printDebug();}
+    if( servoValue == border_left + 1 & rev )  { middle = array_averageFromTo(rngs, border_left   + 1, border_middle); printDebug();}
+    if( servoValue == border_middle +1 & rev ) { right  = array_averageFromTo(rngs, border_middle + 1, border_right); printDebug();}
 }
 
 void fixCourse()
@@ -62,12 +67,12 @@ void fixCourse()
     int rightDist = analog(RIGHT_SENSOR_INPUT);
     
     if( leftDist )
-    {
+      {
         wallLeft = 10 - leftDist;
         wallRight = wallLeft / 5;
     }
     else if ( rightDist )
-    {
+      {
         wallRight = 10 - rightDist;
         wallLeft = wallRight / 5;
     }
@@ -110,7 +115,6 @@ void main()
     
     while(1)
       {
-        printf("i:%d,L:%d,M:%d,R:%d\n",servoValue,left,middle,right);//print debug info
         //printf("%d     %d\n",servoValues[servoValue], servoValue);
         makeServoStep();
         
