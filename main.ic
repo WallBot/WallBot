@@ -24,7 +24,7 @@ int middle=0;//and middle sector
 int wallLeft = 0;
 int wallRight = 0;
 
-int trig = 5;//'too close to obstacle' trigger
+int trig = 60;//'too close to obstacle' trigger
 
 void fillArrayWithServoValues(int arr[])//initialize array function
 { 
@@ -63,29 +63,13 @@ void fixCourse()
     
     if( leftDist )
     {
-        if( leftDist > left / 10 )
-        {
-            wallLeft = leftDist - left;
-            wallRight = 0;
-        }
-        else
-        {
-            wallLeft = 0;
-            wallRight = left - leftDist;
-        }
+        wallLeft = 10 - leftDist;
+        wallRight = wallLeft / 5;
     }
     else if ( rightDist )
     {
-        if( rightDist > right / 10 )
-        {
-            wallRight = rightDist - right;
-            wallLeft = 0;
-        }
-        else
-        {
-            wallRight = 0;
-            wallLeft = rightDist - right;
-        }
+        wallRight = 10 - rightDist;
+        wallLeft = wallRight / 5;
     }
     else
     {
@@ -95,8 +79,8 @@ void fixCourse()
 
 void wallAvoidance() {
     
-    motor(0, 100 - ( 7/4 * right + middle * 1/2 + 1/2 * wallLeft ) );//fractions used to avoid float casting because float nubers does not natively
-    motor(1, 100 - ( 7/4 * left  + middle * 1/2 + 1/2 * wallRight ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
+    motor(0, 100 - ( 7/4 * right + middle * 1/2 + 5 * wallLeft ) );//fractions used to avoid float casting because float nubers does not natively
+    motor(1, 100 - ( 7/4 * left  + middle * 1/2 + 5 * wallRight ) );//supported by MC68HC11 controller, and using them will make serious impact on perfomance
     
     if ( middle > trig )
       {
